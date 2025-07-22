@@ -14,8 +14,6 @@ private const val HASH_TYPE = "SHA-256"
 private const val NUM_HASHED_BYTES = 9
 private const val NUM_BASE64_CHAR = 11
 
-/// From Google Example App
-// https://github.com/googlearchive/android-credentials/blob/master/sms-verification/android/app/src/main/java/com/google/samples/smartlock/sms_verify/AppSignatureHelper.java
 class AppSignatureHelper(context: Context) : ContextWrapper(context) {
 
     fun getAppSignatures(): List<String> {
@@ -48,9 +46,8 @@ class AppSignatureHelper(context: Context) : ContextWrapper(context) {
             val messageDigest = MessageDigest.getInstance(HASH_TYPE)
             messageDigest.update(appInfo.toByteArray(StandardCharsets.UTF_8))
             val hashSignature = messageDigest.digest().copyOfRange(0, NUM_HASHED_BYTES)
-            var base64Hash = Base64.encodeToString(hashSignature, Base64.NO_PADDING or Base64.NO_WRAP)
-            base64Hash = base64Hash.substring(0, NUM_BASE64_CHAR)
-            base64Hash
+            val base64Hash = Base64.encodeToString(hashSignature, Base64.NO_PADDING or Base64.NO_WRAP)
+            base64Hash.substring(0, NUM_BASE64_CHAR)
         } catch (e: NoSuchAlgorithmException) {
             null
         }
