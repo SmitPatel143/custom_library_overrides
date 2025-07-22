@@ -23,12 +23,12 @@ class AppSignatureHelper(context: Context) : ContextWrapper(context) {
 
             val signatures: List<Signature> = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 val info = packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNING_CERTIFICATES)
-                info.signingInfo.apkContentsSigners?.toList() ?: emptyList()
+                info.signingInfo?.apkContentsSigners?.toList() ?: emptyList()
             } else {
                 @Suppress("DEPRECATION")
                 packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES)
                     .signatures
-                    .toList()
+                    ?.toList() ?: emptyList()
             }
 
             signatures.mapNotNull { signature ->
