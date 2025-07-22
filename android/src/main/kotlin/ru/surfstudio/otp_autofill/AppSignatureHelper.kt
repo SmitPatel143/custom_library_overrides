@@ -20,9 +20,16 @@ class AppSignatureHelper(context: Context) : ContextWrapper(context) {
         return try {
             val packageName = packageName
             val packageManager = packageManager
-            val signatures = packageManager.getPackageInfo(packageName,
-                    PackageManager.GET_SIGNATURES).signatures
-            signatures.mapNotNull { hash(packageName, it.toCharsString()) }
+            val signatures: List<Signature> = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+    val info = packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNING_CERTIFICATES)
+    info.signingInfo.apkContentsSigners?.toList() ?: emptyList()
+} else {
+    @Suppress("DEPRECATION")
+    packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES)
+        .signatures
+        .toList()
+}
+ }
         } catch (e: PackageManager.NameNotFoundException) {
             emptyList()
         }
