@@ -3,6 +3,8 @@ package ru.surfstudio.otp_autofill
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.pm.PackageManager
+import android.content.pm.Signature
+import android.os.Build
 import android.util.Base64
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
@@ -20,17 +22,22 @@ class AppSignatureHelper(context: Context) : ContextWrapper(context) {
         return try {
             val packageName = packageName
             val packageManager = packageManager
+
             val signatures: List<Signature> = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-    val info = packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNING_CERTIFICATES)
-    info.signingInfo.apkContentsSigners?.toList() ?: emptyList()
-} else {
-    @Suppress("DEPRECATION")
-    packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES)
-        .signatures
-        .toList()
-}
- }
-        } catch (e: PackageManager.NameNotFoundException) {
+                val info = packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNING_CERTIFICATES)
+                info.signingInfo.apkContentsSigners?.toList() ?: emptyList()
+            } else {
+                @Suppress("DEPRECATION")
+                packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES)
+                    .signatures
+                    .toList()
+            }
+
+            signatures.mapNotNull { signature ->
+                hash(packageName, signature.toCharsString())
+            }
+
+        } catch (e: Exception) {
             emptyList()
         }
     }
@@ -48,5 +55,4 @@ class AppSignatureHelper(context: Context) : ContextWrapper(context) {
             null
         }
     }
-
 }
